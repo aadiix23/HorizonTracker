@@ -3,12 +3,11 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Animated, 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import WaveShape from '../components/WaveShape';
+import FullBg from '../assets/Images/fullbg.svg';
 import Svg, { Circle } from 'react-native-svg';
 
 const { width, height } = Dimensions.get('window');
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-const AnimatedWave = Animated.createAnimatedComponent(WaveShape);
 
 const steps = [
     {
@@ -18,6 +17,7 @@ const steps = [
         image: null,
         waveOffset: '0%',
         progress: 0,
+        imageStyle: {},
     },
     {
         key: 'onboarding1',
@@ -26,14 +26,36 @@ const steps = [
         image: require('../assets/Images/illustration1.webp'),
         waveOffset: '-50%',
         progress: 0.33,
+        imageStyle: {
+            width: width * 0.9,
+            height: height * 0.40,
+            bottom: 17
+        },
     },
     {
         key: 'onboarding2',
         title: 'Track Attendance and Work, Every Day',
         description: 'Mark office, WFH, and meeting attendance, assign daily tasks, and clearly see what\'s completed, pending, or overdue.',
-        image: require('../assets/Images/illustration1.webp'), // Using same image as placeholder if Onboarding2 used same, checked file it did.
+        image: require('../assets/Images/illustration2.webp'),
         waveOffset: '-60%',
         progress: 0.66,
+        imageStyle: {
+            width: width * 0.9,
+            height: height * 0.45,
+        },
+    },
+    {
+        key: 'onboarding3',
+        title: 'See Performance, Not Guesswork',
+        description: 'Get a clear overview of attendance and task performance with member-wise reports and a smart dashboard built for daily oversight.',
+        image: require('../assets/Images/illustartion3.webp'),
+        waveOffset: '-70%',
+        progress: 1.0,
+        imageStyle: {
+            width: width * 0.9,
+            height: height * 0.45,
+            top: 50
+        },
     }
 ];
 
@@ -41,7 +63,7 @@ const Start = () => {
     const navigation = useNavigation();
     const [currentStep, setCurrentStep] = useState(0);
 
-    // Animations
+
     const slideAnim = useRef(new Animated.Value(0)).current;
     const fadeAnim = useRef(new Animated.Value(1)).current;
     const waveAnim = useRef(new Animated.Value(0)).current;
@@ -49,39 +71,56 @@ const Start = () => {
 
 
     const waveInterpolation = waveAnim.interpolate({
-        inputRange: [0, 1, 2],
-        outputRange: ['0%', '-50%', '-100%'],
+        inputRange: [0, 1, 2, 3],
+        outputRange: ['0%', '-50%', '-100%', '-150%'],
     })
 
     const waveX = waveAnim.interpolate({
-        inputRange: [0, 1, 2],
-        outputRange: [0, -width * 0.5, -width * 1.0]
+        inputRange: [0, 1, 2, 3],
+        outputRange: [0, -width * 0.55, -width * 1.0, -width * 1.45]
     });
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
             const nextStep = currentStep + 1;
 
-            // 1. Animate Content Out
+            Animated.timing(waveAnim, {
+                toValue: nextStep,
+                duration: 2000,
+                easing: Easing.inOut(Easing.exp),
+                useNativeDriver: true
+            }).start();
+
             Animated.parallel([
-                Animated.timing(slideAnim, { toValue: -width, duration: 300, useNativeDriver: true }),
+                Animated.timing(slideAnim, {
+                    toValue: -width,
+                    duration: 1000,
+                    easing: Easing.in(Easing.exp),
+                    useNativeDriver: true
+                }),
             ]).start(() => {
-                // 2. Change State
+
                 setCurrentStep(nextStep);
                 slideAnim.setValue(width);
 
-                // 3. Animate Content In + Wave + Progress
+
                 Animated.parallel([
                     Animated.timing(slideAnim, { toValue: 0, duration: 1000, easing: Easing.out(Easing.exp), useNativeDriver: true }),
-                    Animated.timing(waveAnim, { toValue: nextStep, duration: 1000, easing: Easing.out(Easing.exp), useNativeDriver: true }),
                     Animated.timing(progressAnim, { toValue: steps[nextStep].progress, duration: 1000, easing: Easing.out(Easing.exp), useNativeDriver: true })
                 ]).start();
             });
         } else {
             console.log("Finish Onboarding");
-            // navigation.replace('Login'); 
+
         }
     };
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            handleNext();
+        }, 10);
+        return () => clearTimeout(timer);
+    }, []);
 
     const currentContent = steps[currentStep];
     const radius = 33;
@@ -102,7 +141,7 @@ const Start = () => {
             <Animated.View style={[styles.backgroundImage, {
                 transform: [{ translateX: waveX }]
             }]}>
-                <WaveShape width="270%" height="100%" />
+                <FullBg width="270%" height="100%" preserveAspectRatio="none" />
             </Animated.View>
 
             <SafeAreaView style={styles.safeArea}>
@@ -116,7 +155,7 @@ const Start = () => {
                             <Animated.View style={[styles.imageContainer, { transform: [{ translateX: slideAnim }] }]}>
                                 <Image
                                     source={currentContent.image}
-                                    style={styles.image}
+                                    style={currentContent.imageStyle}
                                     resizeMode="contain"
                                 />
                             </Animated.View>
@@ -126,7 +165,7 @@ const Start = () => {
                             </Animated.View>
                         </>
                     ) : (
-                        <View style={{ flex: 1 }} /> // Spacer for Start screen
+                        <View style={{ flex: 1 }} />
                     )}
 
                     <View style={styles.footer}>
@@ -189,10 +228,10 @@ const styles = StyleSheet.create({
     },
     backgroundImage: {
         position: 'absolute',
-        top: '44%',
+        top: '38%',
         left: 0,
         width: width,
-        height: '50%',
+        height: '38%',
 
     },
     contentContainer: {
@@ -223,6 +262,7 @@ const styles = StyleSheet.create({
     image: {
         width: width * 0.9,
         height: height * 0.40,
+        bottom: 15
     },
     description: {
         width: 377,
