@@ -111,7 +111,7 @@ const Start = () => {
             });
         } else {
             console.log("Finish Onboarding");
-
+            navigation.navigate('Login');
         }
     };
 
