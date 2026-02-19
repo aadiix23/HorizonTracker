@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Easing, View, Text } from 'react-native';
+import { Easing, View, Text, Dimensions, PixelRatio } from 'react-native';
 import Start from '../onboardingFlow/Start';
 import Login from '../authflow/Login';
 import analytics from '../homeScreenFlow/analytics'
@@ -60,6 +60,14 @@ const verticalSlide = ({ current, next, layouts }: any) => {
     };
 };
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const scale = SCREEN_WIDTH / 414; 
+
+const responsiveFontSize = (size: number) => {
+    const newSize = size * scale;
+    return Math.round(PixelRatio.roundToNearestPixel(newSize));
+};
+
 function AppNavigator() {
     return (
         <Stack.Navigator
@@ -88,7 +96,7 @@ const TabIcon = ({ name, focused, color, size }: any) => {
                     style={{
                         position: 'absolute',
                         top: -5,
-                        width: 40,
+                        width: responsiveFontSize(40),
                         height: 6,
                         backgroundColor: '#8E24AA',
                         borderBottomLeftRadius: 6,
@@ -113,12 +121,12 @@ const TabNavigator = () => {
                     backgroundColor: '#FCD5FF',
                     borderTopWidth: 0,
                     elevation: 5,
-                    height: 75,
-                    paddingBottom: 15,
+                    height: responsiveFontSize(75),
+                    paddingBottom: responsiveFontSize(15),
                 },
                 tabBarLabelStyle: {
-                    fontFamily: 'serif',
-                    fontSize: 12,
+                    fontFamily: 'Aleo-SemiBold',
+                    fontSize: responsiveFontSize(12),
                     fontWeight: '600',
                     marginTop: 4,
                 },
@@ -132,7 +140,7 @@ const TabNavigator = () => {
                 component={dashBoard}
                 options={{
                     tabBarIcon: (props) => <TabIcon name="view-dashboard" {...props} />,
-                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: 12, fontFamily: 'serif', fontWeight: '600' }}>Dashboard</Text> : null
+                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: responsiveFontSize(12), fontFamily: 'Aleo-SemiBold', fontWeight: '600' }}>Dashboard</Text> : null
                 }}
             />
             <Tab.Screen
@@ -140,7 +148,7 @@ const TabNavigator = () => {
                 component={attendence}
                 options={{
                     tabBarIcon: (props) => <TabIcon name="calendar-check" {...props} />,
-                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: 12, fontFamily: 'serif', fontWeight: '600' }}>Attendance</Text> : null
+                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: responsiveFontSize(12), fontFamily: 'Aleo-SemiBold', fontWeight: '600' }}>Attendance</Text> : null
                 }}
             />
             <Tab.Screen
@@ -148,7 +156,7 @@ const TabNavigator = () => {
                 component={team}
                 options={{
                     tabBarIcon: (props) => <TabIcon name="account-group" {...props} />,
-                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: 12, fontFamily: 'serif', fontWeight: '600' }}>Team</Text> : null
+                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: responsiveFontSize(12), fontFamily: 'Aleo-SemiBold', fontWeight: '600' }}>Team</Text> : null
                 }}
             />
             <Tab.Screen
@@ -156,7 +164,7 @@ const TabNavigator = () => {
                 component={task}
                 options={{
                     tabBarIcon: (props) => <TabIcon name="clipboard-list" {...props} />,
-                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: 12, fontFamily: 'serif', fontWeight: '600' }}>Task</Text> : null
+                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: responsiveFontSize(12), fontFamily: 'Aleo-SemiBold', fontWeight: '600' }}>Task</Text> : null
                 }}
             />
             <Tab.Screen
@@ -164,7 +172,7 @@ const TabNavigator = () => {
                 component={analytics}
                 options={{
                     tabBarIcon: (props) => <TabIcon name="chart-bar" {...props} />,
-                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: 12, fontFamily: 'serif', fontWeight: '600' }}>Analytics</Text> : null
+                    tabBarLabel: ({ focused, color }) => focused ? <Text style={{ color, fontSize: responsiveFontSize(12), fontFamily: 'Aleo-SemiBold', fontWeight: '600' }}>Analytics</Text> : null
                 }}
             />
         </Tab.Navigator>
