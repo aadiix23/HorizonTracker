@@ -31,7 +31,7 @@ const team = () => {
           <Text className='text-2xl font-aleo-bold text-center text-[#180537]'>Team Members</Text>
           <Icon name="account-circle" size={24} color="black" />
         </View>
-        <SearchBar />
+        <SearchBar placeholder='Search For Team Members'/>
         <ScrollView 
           contentContainerStyle={{ paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}>

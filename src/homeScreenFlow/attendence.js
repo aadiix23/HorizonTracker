@@ -80,7 +80,7 @@ const attendence = () => {
           <Text className='text-2xl font-aleo-medium text-[#18053799]'>Team Members</Text>
         </View>
 
-        <SearchBar />
+        <SearchBar placeholder='Search For Members' />
 
         <ScrollView
           className="flex-1"
