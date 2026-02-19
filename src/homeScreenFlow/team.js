@@ -4,7 +4,7 @@ import React from 'react'
 const team = () => {
   return (
     <View>
-      <Text>team</Text>
+      <Text></Text>
     </View>
   )
 }

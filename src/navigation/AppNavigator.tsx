@@ -1,11 +1,9 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Easing, View, Text } from 'react-native';
 import Start from '../onboardingFlow/Start';
 import Login from '../authflow/Login';
-import homeNavigation from '../homeScreenFlow/homeNavigator'
 import analytics from '../homeScreenFlow/analytics'
 import attendence from '../homeScreenFlow/attendence'
 import dashBoard from '../homeScreenFlow/dashBoard'
@@ -25,7 +23,6 @@ export type TabParamList = {
 export type RootStackParamList = {
     Start: undefined;
     Login: undefined;
-    homeNavigation: undefined;
     MainTabs: undefined;
 };
 
@@ -65,24 +62,22 @@ const verticalSlide = ({ current, next, layouts }: any) => {
 
 function AppNavigator() {
     return (
-        <NavigationContainer>
-            <Stack.Navigator
-                id="rootStack"
-                initialRouteName="MainTabs"
-                screenOptions={{
-                    headerShown: false,
-                    cardStyleInterpolator: verticalSlide,
-                    transitionSpec: {
-                        open: config,
-                        close: config,
-                    },
-                }}
-            >
-                <Stack.Screen name="Start" component={Start} />
-                <Stack.Screen name="Login" component={Login} />
-                <Stack.Screen name="MainTabs" component={TabNavigator} />
-            </Stack.Navigator>
-        </NavigationContainer>
+        <Stack.Navigator
+            id="rootStack"
+            initialRouteName="MainTabs"
+            screenOptions={{
+                headerShown: false,
+                cardStyleInterpolator: verticalSlide,
+                transitionSpec: {
+                    open: config,
+                    close: config,
+                },
+            }}
+        >
+            <Stack.Screen name="Start" component={Start} />
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="MainTabs" component={TabNavigator} />
+        </Stack.Navigator>
     );
 }
 const TabIcon = ({ name, focused, color, size }: any) => {
