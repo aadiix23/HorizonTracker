@@ -1,8 +1,10 @@
-import { StyleSheet, Text, View, TextInput, Image, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, ScrollView } from 'react-native'
 import React, { useState } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import Person from '../assets/Images/clarity_employee-line.svg';
+import SearchBar from './components/SearchBar';
+import TeamMemberCard from './components/TeamMemberCard';
 
 const teamMembers = [
   { id: 1, name: 'Divyansh Pandey', email: 'divyansh@devhorizon.in', role: 'UI/UX Designer, Database, Team manager', image: 'https://randomuser.me/api/portraits/men/32.jpg' },
@@ -30,6 +32,7 @@ const attendence = () => {
           <Text className='text-2xl font-aleo-bold text-center text-[#180537]'>Attendance</Text>
           <Icon name="account-circle" size={24} color="black" />
         </View>
+
         <View className='flex flex-row justify-between '>
           <View className='flex flex-row items-center mt-10'>
             <Icon name="calendar-blank-outline" size={24} color="#18053799" />
@@ -41,6 +44,7 @@ const attendence = () => {
             <Icon name="chevron-down" size={22} color="#18053799" />
           </View>
         </View>
+
         <View className="bg-[#EFEFEF] py-4 mt-6 shadow-sm -mx-3">
           <View className="flex flex-row justify-around items-center">
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
@@ -70,47 +74,21 @@ const attendence = () => {
             })}
           </View>
         </View>
+
         <View className='flex flex-row items-center mt-10 gap-2'>
           <Person />
           <Text className='text-2xl font-aleo-medium text-[#18053799]'>Team Members</Text>
         </View>
-        <View className='mt-5 flex-row items-center border-[1.5px] border-[#8A2B9133] rounded-xl bg-white/50 px-4 h-14'>
-          <TextInput
-            className='flex-1 font-aleo-regular text-[#18053799] text-lg'
-            placeholder='Search for members'
-            placeholderTextColor='#18053766'
-          />
-          <View className='w-[1px] h-8 bg-[#8A2B9133] mx-3' />
-          <Icon name="magnify" size={28} color="#18053799" />
-        </View>
+
+        <SearchBar />
+
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
         >
           {teamMembers.map((member) => (
-            <View key={member.id} className="bg-white rounded-xl p-4 mt-6 shadow-sm shadow-[#8A2B9122]" >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center">
-                  <Image
-                    source={{ uri: member.image }}
-                    className="w-14 h-14 rounded-full mr-4 bg-[#8A2B9111]"
-                  />
-                  <View>
-                    <Text className="text-xl font-aleo-bold text-[#8A2B91CC]">{member.name}</Text>
-                    <Text className="text-l font-aleo-semibold text-[#18053799]">{member.email}</Text>
-                  </View>
-                </View>
-                <View className="self-start">
-                  <Icon name="dots-horizontal" size={24} color="#18053733" />
-                </View>
-              </View>
-              <View className="mt-4 b border-[#00000005] pt-3">
-                <Text className="text-sm font-aleo-medium text-[#18053799]">
-                  {member.role}
-                </Text>
-              </View>
-            </View>
+            <TeamMemberCard key={member.id} member={member} />
           ))}
 
         </ScrollView>
