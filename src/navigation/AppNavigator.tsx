@@ -3,7 +3,7 @@ import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Easing, View, Text, Dimensions, PixelRatio } from 'react-native';
 import Start from '../onboardingFlow/Start';
-import Login from '../authflow/Login';
+import Login from '../authflow/login';
 import analytics from '../homeScreenFlow/analytics'
 import attendence from '../homeScreenFlow/attendence'
 import dashBoard from '../homeScreenFlow/dashBoard'
@@ -61,7 +61,7 @@ const verticalSlide = ({ current, next, layouts }: any) => {
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const scale = SCREEN_WIDTH / 414; 
+const scale = SCREEN_WIDTH / 414;
 
 const responsiveFontSize = (size: number) => {
     const newSize = size * scale;
