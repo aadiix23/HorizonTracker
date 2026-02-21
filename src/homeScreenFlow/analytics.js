@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import React from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
@@ -19,7 +19,7 @@ const teamMembers = [
   { id: 10, name: 'Megha Jain', email: 'megha@devhorizon.in', role: 'HR Manager, Operations', image: 'https://randomuser.me/api/portraits/women/50.jpg' },
 ];
 
-const team = () => {
+const team = ({ navigation }) => {
   return (
     <LinearGradient
       colors={['#FCFBFE', '#F1DBFD']}
@@ -27,12 +27,14 @@ const team = () => {
     >
       <View className='mx-4'>
         <View className='flex flex-row justify-between items-center mt-16 '>
-          <Icon name="menu" size={24} color="#9D869B" />
+          <TouchableOpacity onPress={() => navigation.navigate('hamburgerMenu')}>
+            <Icon name="menu" size={24} color="#9D869B" />
+          </TouchableOpacity>
           <Text className='text-2xl font-aleo-bold text-center text-[#180537]'>Analytics</Text>
           <Icon name="account-circle" size={24} color="black" />
         </View>
-        <SearchBar placeholder='Search For Team Member Analytics'/>
-        <ScrollView 
+        <SearchBar placeholder='Search For Team Member Analytics' />
+        <ScrollView
           contentContainerStyle={{ paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}>
           {teamMembers.map((member) => (

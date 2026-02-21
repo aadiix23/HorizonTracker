@@ -9,6 +9,7 @@ import attendence from '../homeScreenFlow/attendence'
 import dashBoard from '../homeScreenFlow/dashBoard'
 import team from '../homeScreenFlow/team'
 import task from '../homeScreenFlow/task'
+import hamburgerMenu from '../homeScreenFlow/hamburgerMenu'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
@@ -18,12 +19,14 @@ export type TabParamList = {
     attendence: undefined;
     team: undefined;
     task: undefined;
+    hamburgerMenu: undefined;
 };
 
 export type RootStackParamList = {
     Start: undefined;
     Login: undefined;
     MainTabs: undefined;
+    hamburgerMenu: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -60,6 +63,39 @@ const verticalSlide = ({ current, next, layouts }: any) => {
     };
 };
 
+const leftSlide = ({ current, next, layouts }: any) => {
+    // Incoming hamburgerMenu slides in from the left edge
+    const translateX = current.progress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [-layouts.screen.width, 0],
+    });
+
+    // The screen behind it nudges slightly to the right for a drawer feel
+    const translateXOut = next
+        ? next.progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, layouts.screen.width * 0.25],
+        })
+        : 0;
+
+    return {
+        cardStyle: {
+            transform: [
+                { translateX },
+                { translateX: translateXOut },
+            ],
+        },
+    };
+};
+
+const drawerConfig = {
+    animation: 'timing' as const,
+    config: {
+        duration: 350,
+        easing: Easing.bezier(0.25, 0.46, 0.45, 0.94),
+    },
+};
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const scale = SCREEN_WIDTH / 414;
 
@@ -85,6 +121,17 @@ function AppNavigator() {
             <Stack.Screen name="Start" component={Start} />
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Screen
+                name="hamburgerMenu"
+                component={hamburgerMenu}
+                options={{
+                    cardStyleInterpolator: leftSlide,
+                    transitionSpec: {
+                        open: drawerConfig,
+                        close: drawerConfig,
+                    },
+                }}
+            />
         </Stack.Navigator>
     );
 }

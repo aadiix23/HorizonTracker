@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import { StyleSheet, Text, View, Animated, TouchableOpacity } from 'react-native'
+import React, { useState, useRef } from 'react'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import Person from '../assets/Images/clarity_employee-line.svg';
@@ -19,8 +19,25 @@ const teamMembers = [
   { id: 10, name: 'Megha Jain', email: 'megha@devhorizon.in', role: 'HR Manager, Operations', image: 'https://randomuser.me/api/portraits/women/50.jpg' },
 ];
 
-const attendence = () => {
+const attendence = ({ navigation }) => {
   const [selected, setSelected] = useState("2026-02-12");
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const [contentHeight, setContentHeight] = useState(1);
+  const [containerHeight, setContainerHeight] = useState(1);
+
+  const thumbHeight = contentHeight > containerHeight
+    ? Math.max(48, (containerHeight / contentHeight) * containerHeight)
+    : containerHeight;
+
+  const maxScrollOffset = Math.max(1, contentHeight - containerHeight);
+  const maxThumbOffset = Math.max(0, containerHeight - thumbHeight);
+
+  const thumbTop = scrollY.interpolate({
+    inputRange: [0, maxScrollOffset],
+    outputRange: [0, maxThumbOffset],
+    extrapolate: 'clamp',
+  });
   return (
     <LinearGradient
       colors={['#FCFBFE', '#F1DBFD']}
@@ -28,7 +45,9 @@ const attendence = () => {
     >
       <View className='mx-4 flex-1'>
         <View className='flex flex-row justify-between items-center mt-16 '>
-          <Icon name="menu" size={24} color="#9D869B" />
+          <TouchableOpacity onPress={() => navigation.navigate('hamburgerMenu')}>
+            <Icon name="menu" size={24} color="#9D869B" />
+          </TouchableOpacity>
           <Text className='text-2xl font-aleo-bold text-center text-[#180537]'>Tasks</Text>
           <Icon name="account-circle" size={24} color="black" />
         </View>
@@ -52,16 +71,36 @@ const attendence = () => {
         </View>
         <SearchBar placeholder='Search For Task To Manage' />
 
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ paddingBottom: 40 }}
-          showsVerticalScrollIndicator={false}
+        <View
+          style={{ flex: 1, flexDirection: 'row' }}
+          onLayout={e => setContainerHeight(e.nativeEvent.layout.height)}
         >
-          {teamMembers.map((member) => (
-            <TeamMemberCard key={member.id} member={member} />
-          ))}
-
-        </ScrollView>
+          <Animated.ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            showsVerticalScrollIndicator={false}
+            onContentSizeChange={(_, h) => setContentHeight(h)}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+              { useNativeDriver: false }
+            )}
+            scrollEventThrottle={16}
+          >
+            {teamMembers.map((member) => (
+              <TeamMemberCard key={member.id} member={member} />
+            ))}
+          </Animated.ScrollView>
+          <View style={{ width: 6, marginLeft: 6, marginVertical: 16, borderRadius: 3, backgroundColor: '#E0C4E8', height: containerHeight - 32, overflow: 'hidden' }}>
+            <Animated.View style={{ width: 6, height: thumbHeight, borderRadius: 3, marginTop: thumbTop, overflow: 'hidden' }}>
+              <LinearGradient
+                colors={['#AB3A8D', '#3D058B']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={{ flex: 1 }}
+              />
+            </Animated.View>
+          </View>
+        </View>
       </View>
     </LinearGradient>
   )
