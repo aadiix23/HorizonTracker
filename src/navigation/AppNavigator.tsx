@@ -108,7 +108,7 @@ function AppNavigator() {
     return (
         <Stack.Navigator
             id="rootStack"
-            initialRouteName="MainTabs"
+            initialRouteName="Start"
             screenOptions={{
                 headerShown: false,
                 cardStyleInterpolator: verticalSlide,

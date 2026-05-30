@@ -5,20 +5,36 @@ import LinearGradient from 'react-native-linear-gradient';
 import SearchBar from './components/SearchBar';
 import TeamMemberCard from './components/TeamMemberCard';
 
-const teamMembers = [
-  { id: 1, name: 'Divyansh Pandey', email: 'divyansh@devhorizon.in', role: 'UI/UX Designer, Database, Team manager', image: 'https://randomuser.me/api/portraits/men/32.jpg' },
-  { id: 2, name: 'Alok Verma', email: 'alok@devhorizon.in', role: 'Frontend Developer, React Native', image: 'https://randomuser.me/api/portraits/women/44.jpg' },
-  { id: 3, name: 'Rohan Gupta', email: 'rohan@devhorizon.in', role: 'Backend Engineer, Node.js', image: 'https://randomuser.me/api/portraits/men/46.jpg' },
-  { id: 4, name: 'Isha Patel', email: 'isha@devhorizon.in', role: 'QA Lead, Automation', image: 'https://randomuser.me/api/portraits/women/65.jpg' },
-  { id: 5, name: 'Vikram Singh', email: 'vikram@devhorizon.in', role: 'DevOps, AWS Cloud', image: 'https://randomuser.me/api/portraits/men/85.jpg' },
-  { id: 6, name: 'Kritika Roy', email: 'kritika@devhorizon.in', role: 'Product Designer, Figma', image: 'https://randomuser.me/api/portraits/women/17.jpg' },
-  { id: 7, name: 'Amit Verma', email: 'amit@devhorizon.in', role: 'Mobile Lead, Architecture', image: 'https://randomuser.me/api/portraits/men/22.jpg' },
-  { id: 8, name: 'Sneha Reddy', email: 'sneha@devhorizon.in', role: 'UI Designer, Illustrations', image: 'https://randomuser.me/api/portraits/women/33.jpg' },
-  { id: 9, name: 'Arjun Das', email: 'arjun@devhorizon.in', role: 'Database Admin, PostgreSQL', image: 'https://randomuser.me/api/portraits/men/11.jpg' },
-  { id: 10, name: 'Megha Jain', email: 'megha@devhorizon.in', role: 'HR Manager, Operations', image: 'https://randomuser.me/api/portraits/women/50.jpg' },
-];
+import { AppContext } from '../context/AppContext';
+import { Modal, TextInput } from 'react-native';
 
 const team = ({ navigation }) => {
+  const { teamMembers, addTeamMember } = React.useContext(AppContext);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newRole, setNewRole] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+
+  const handleAddMember = () => {
+    if (newName && newRole) {
+      addTeamMember({
+        name: newName,
+        role: newRole,
+        email: newEmail || `${newName.split(' ')[0].toLowerCase()}@devhorizon.in`,
+      });
+      setNewName('');
+      setNewRole('');
+      setNewEmail('');
+      setModalVisible(false);
+    }
+  };
+
+  const filteredMembers = teamMembers.filter(member => 
+    member.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    member.role.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const scrollY = useRef(new Animated.Value(0)).current;
   const [contentHeight, setContentHeight] = useState(1);
   const [containerHeight, setContainerHeight] = useState(1);
@@ -47,9 +63,11 @@ const team = ({ navigation }) => {
             <Icon name="menu" size={24} color="#9D869B" />
           </TouchableOpacity>
           <Text className='text-2xl font-aleo-bold text-center text-[#180537]'>Team Members</Text>
-          <Icon name="account-circle" size={24} color="black" />
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Icon name="account-plus" size={28} color="#8A2B91" />
+          </TouchableOpacity>
         </View>
-        <SearchBar placeholder='Search For Team Members' />
+        <SearchBar placeholder='Search For Team Members' value={searchQuery} onChangeText={setSearchQuery} />
 
         <View
           style={{ flex: 1, flexDirection: 'row' }}
@@ -66,7 +84,7 @@ const team = ({ navigation }) => {
             )}
             scrollEventThrottle={16}
           >
-            {teamMembers.map((member) => (
+            {filteredMembers.map((member) => (
               <TeamMemberCard key={member.id} member={member} />
             ))}
           </Animated.ScrollView>
@@ -84,10 +102,74 @@ const team = ({ navigation }) => {
         </View>
 
       </View>
+      
+      {/* Add Team Member Modal */}
+      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add Team Member</Text>
+            <TextInput style={styles.input} placeholder="Full Name" value={newName} onChangeText={setNewName} placeholderTextColor="#888" />
+            <TextInput style={styles.input} placeholder="Role" value={newRole} onChangeText={setNewRole} placeholderTextColor="#888" />
+            <TextInput style={styles.input} placeholder="Email (optional)" value={newEmail} onChangeText={setNewEmail} placeholderTextColor="#888" />
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={[styles.modalButton, { backgroundColor: '#F44336' }]}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleAddMember} style={[styles.modalButton, { backgroundColor: '#4CAF50' }]}>
+                <Text style={styles.modalButtonText}>Add Member</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   )
 }
 
 export default team
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    elevation: 5
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontFamily: 'Aleo-Bold',
+    marginBottom: 16,
+    color: '#180537'
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 12,
+    fontFamily: 'Aleo-Regular',
+    color: '#000'
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10
+  },
+  modalButton: {
+    padding: 12,
+    borderRadius: 8,
+    width: '48%',
+    alignItems: 'center'
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontFamily: 'Aleo-Bold',
+  }
+})

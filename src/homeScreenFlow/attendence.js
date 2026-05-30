@@ -1,26 +1,130 @@
 import { StyleSheet, Text, View, ScrollView, Animated, TouchableOpacity } from 'react-native'
 import React, { useState, useRef } from 'react'
+import { Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import Person from '../assets/Images/clarity_employee-line.svg';
 import SearchBar from './components/SearchBar';
-import TeamMemberCard from './components/TeamMemberCard';
+import TeamMemberCard from './components/TeamMemberCard'; // Kept for reference or if you still want generic cards, but we'll use a custom AttendanceCard
 
-const teamMembers = [
-  { id: 1, name: 'Divyansh Pandey', email: 'divyansh@devhorizon.in', role: 'UI/UX Designer, Database, Team manager', image: 'https://randomuser.me/api/portraits/men/32.jpg' },
-  { id: 2, name: 'Alok Verma', email: 'alok@devhorizon.in', role: 'Frontend Developer, React Native', image: 'https://randomuser.me/api/portraits/women/44.jpg' },
-  { id: 3, name: 'Rohan Gupta', email: 'rohan@devhorizon.in', role: 'Backend Engineer, Node.js', image: 'https://randomuser.me/api/portraits/men/46.jpg' },
-  { id: 4, name: 'Isha Patel', email: 'isha@devhorizon.in', role: 'QA Lead, Automation', image: 'https://randomuser.me/api/portraits/women/65.jpg' },
-  { id: 5, name: 'Vikram Singh', email: 'vikram@devhorizon.in', role: 'DevOps, AWS Cloud', image: 'https://randomuser.me/api/portraits/men/85.jpg' },
-  { id: 6, name: 'Kritika Roy', email: 'kritika@devhorizon.in', role: 'Product Designer, Figma', image: 'https://randomuser.me/api/portraits/women/17.jpg' },
-  { id: 7, name: 'Amit Verma', email: 'amit@devhorizon.in', role: 'Mobile Lead, Architecture', image: 'https://randomuser.me/api/portraits/men/22.jpg' },
-  { id: 8, name: 'Sneha Reddy', email: 'sneha@devhorizon.in', role: 'UI Designer, Illustrations', image: 'https://randomuser.me/api/portraits/women/33.jpg' },
-  { id: 9, name: 'Arjun Das', email: 'arjun@devhorizon.in', role: 'Database Admin, PostgreSQL', image: 'https://randomuser.me/api/portraits/men/11.jpg' },
-  { id: 10, name: 'Megha Jain', email: 'megha@devhorizon.in', role: 'HR Manager, Operations', image: 'https://randomuser.me/api/portraits/women/50.jpg' },
-];
+import { AppContext } from '../context/AppContext';
+
+const AttendanceCard = ({ member, onMarkPresent, onMarkAbsent }) => {
+  const swipeableRef = useRef(null);
+  let statusColor = '#4CAF50'; // Present
+  let bgColor = '#E8F5E9';
+  if (member.status === 'Absent') {
+    statusColor = '#F44336';
+    bgColor = '#FFEBEE';
+  } else if (member.status === 'Late') {
+    statusColor = '#FF9800';
+    bgColor = '#FFF3E0';
+  } else if (member.status === 'On Leave') {
+    statusColor = '#9E9E9E';
+    bgColor = '#F5F5F5';
+  }
+
+  const handleMarkPresent = () => {
+    onMarkPresent(member.id);
+    if (swipeableRef.current) {
+      swipeableRef.current.close();
+    }
+  };
+
+  const handleMarkAbsent = () => {
+    onMarkAbsent(member.id);
+    if (swipeableRef.current) {
+      swipeableRef.current.close();
+    }
+  };
+
+  const renderLeftActions = () => {
+    return (
+      <View style={{ backgroundColor: '#4CAF50', justifyContent: 'center', alignItems: 'flex-start', paddingLeft: 20, borderRadius: 12, marginBottom: 12, flex: 1 }}>
+        <Icon name="check-circle" size={32} color="#FFF" />
+      </View>
+    );
+  };
+
+  const renderRightActions = () => {
+    return (
+      <View style={{ backgroundColor: '#F44336', justifyContent: 'center', alignItems: 'flex-end', paddingRight: 20, borderRadius: 12, marginBottom: 12, flex: 1 }}>
+        <Icon name="close-circle" size={32} color="#FFF" />
+      </View>
+    );
+  };
+
+  return (
+    <Swipeable
+      ref={swipeableRef}
+      renderLeftActions={renderLeftActions}
+      renderRightActions={renderRightActions}
+      onSwipeableLeftOpen={handleMarkPresent}
+      onSwipeableRightOpen={handleMarkAbsent}
+    >
+      <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <View style={styles.userInfo}>
+          <Text style={styles.userName}>{member.name}</Text>
+          <Text style={styles.userRole}>{member.role}</Text>
+        </View>
+        <View style={[styles.statusBadge, { backgroundColor: bgColor }]}>
+          <Text style={[styles.statusText, { color: statusColor }]}>{member.status}</Text>
+        </View>
+      </View>
+      <View style={styles.timeContainer}>
+        <View style={styles.timeBlock}>
+          <Icon name="login" size={14} color="#4CAF50" />
+          <Text style={styles.timeText}>In: {member.timeIn}</Text>
+        </View>
+        <View style={styles.timeBlock}>
+          <Icon name="logout" size={14} color="#F44336" />
+          <Text style={styles.timeText}>Out: {member.timeOut}</Text>
+        </View>
+      </View>
+      </View>
+    </Swipeable>
+  );
+};
 
 const attendence = ({ navigation }) => {
-  const [selected, setSelected] = useState("2026-02-12");
+  const { attendanceData, markAttendance } = React.useContext(AppContext);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleMarkPresent = (id) => {
+    const timeIn = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    markAttendance(id, 'Present', timeIn, '--:-- PM');
+  };
+
+  const handleMarkAbsent = (id) => {
+    markAttendance(id, 'Absent', '--:-- AM', '--:-- PM');
+  };
+
+  const today = new Date();
+  
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const todayStr = `${yyyy}-${mm}-${dd}`;
+  
+  const [selected, setSelected] = useState(todayStr);
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const currentMonth = monthNames[today.getMonth()];
+  const currentYear = today.getFullYear();
+
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+
+  const weekDays = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    return d;
+  });
+
+  const filteredAttendance = attendanceData.filter(member => 
+    member.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const [contentHeight, setContentHeight] = useState(1);
@@ -38,6 +142,7 @@ const attendence = ({ navigation }) => {
     outputRange: [0, maxThumbOffset],
     extrapolate: 'clamp',
   });
+
   return (
     <LinearGradient
       colors={['#FCFBFE', '#F1DBFD']}
@@ -55,8 +160,8 @@ const attendence = ({ navigation }) => {
         <View className='flex flex-row justify-between '>
           <View className='flex flex-row items-center mt-10'>
             <Icon name="calendar-blank-outline" size={24} color="#18053799" />
-            <Text className='text-2xl font-aleo-bold text-center text-[#8A2B91] mt-1 ml-1'>Feb</Text>
-            <Text className='text-sm font-aleo-bold text-[#180537] mt-3 ml-1'>2026</Text>
+            <Text className='text-2xl font-aleo-bold text-center text-[#8A2B91] mt-1 ml-1'>{currentMonth}</Text>
+            <Text className='text-sm font-aleo-bold text-[#180537] mt-3 ml-1'>{currentYear}</Text>
           </View>
           <View className='flex flex-row items-center mt-10'>
             <Text className='text-lg font-aleo-medium text-[#18053799] mr-1'>Office</Text>
@@ -66,8 +171,15 @@ const attendence = ({ navigation }) => {
 
         <View className="bg-[#EFEFEF] py-4 mt-6 shadow-sm -mx-3">
           <View className="flex flex-row justify-around items-center">
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => {
-              const dateStr = `2026-02-${(10 + index).toString().padStart(2, '0')}`;
+            {weekDays.map((dateObj, index) => {
+              const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+              const day = dayLabels[index];
+              
+              const yyyy = dateObj.getFullYear();
+              const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+              const dd = String(dateObj.getDate()).padStart(2, '0');
+              const dateStr = `${yyyy}-${mm}-${dd}`;
+              
               const isSelected = selected === dateStr;
               return (
                 <View
@@ -79,7 +191,7 @@ const attendence = ({ navigation }) => {
                     {day}
                   </Text>
                   <Text className={`text-lg font-aleo-bold ${isSelected ? 'text-white' : 'text-[#180537]'}`}>
-                    {10 + index}
+                    {dateObj.getDate()}
                   </Text>
                 </View>
               );
@@ -89,17 +201,15 @@ const attendence = ({ navigation }) => {
 
         <View className='flex flex-row items-center mt-10 gap-2'>
           <Person />
-          <Text className='text-2xl font-aleo-medium text-[#18053799]'>Team Members</Text>
+          <Text className='text-2xl font-aleo-medium text-[#18053799]'>Team Attendance</Text>
         </View>
 
-        <SearchBar placeholder='Search For Members' />
+        <SearchBar placeholder='Search For Members' value={searchQuery} onChangeText={setSearchQuery} />
 
-        {/* List + custom scrollbar */}
         <View
           style={{ flex: 1, flexDirection: 'row' }}
           onLayout={e => setContainerHeight(e.nativeEvent.layout.height)}
         >
-          {/* Card list */}
           <Animated.ScrollView
             style={{ flex: 1 }}
             contentContainerStyle={{ paddingBottom: 40 }}
@@ -111,8 +221,13 @@ const attendence = ({ navigation }) => {
             )}
             scrollEventThrottle={16}
           >
-            {teamMembers.map((member) => (
-              <TeamMemberCard key={member.id} member={member} />
+            {filteredAttendance.map((member) => (
+              <AttendanceCard 
+                key={member.id} 
+                member={member} 
+                onMarkPresent={handleMarkPresent}
+                onMarkAbsent={handleMarkAbsent}
+              />
             ))}
           </Animated.ScrollView>
           <View style={{ width: 6, marginLeft: 6, marginVertical: 16, borderRadius: 3, backgroundColor: '#E0C4E8', height: containerHeight - 32, overflow: 'hidden' }}>
@@ -134,4 +249,60 @@ const attendence = ({ navigation }) => {
 
 export default attendence
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontFamily: 'Aleo-Bold',
+    color: '#180537',
+  },
+  userRole: {
+    fontSize: 12,
+    fontFamily: 'Aleo-Regular',
+    color: '#18053799',
+    marginTop: 2,
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusText: {
+    fontSize: 10,
+    fontFamily: 'Aleo-Bold',
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    gap: 16,
+  },
+  timeBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  timeText: {
+    fontSize: 12,
+    fontFamily: 'Aleo-Medium',
+    color: '#180537',
+    marginLeft: 4,
+  }
+})

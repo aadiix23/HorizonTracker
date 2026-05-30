@@ -11,7 +11,8 @@ import {
     ScrollView,
     Dimensions,
     ImageBackground,
-    SafeAreaView
+    SafeAreaView,
+    ActivityIndicator
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -20,12 +21,13 @@ const { width, height } = Dimensions.get('window');
 const scale = width / 375;
 const verticalScale = height / 812;
 
-const Login = () => {
+const Login = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = () => {
         let valid = true;
@@ -44,7 +46,17 @@ const Login = () => {
         }
 
         if (valid) {
-            console.log("Login Successful");
+            if (email.toLowerCase() === 'admin@horizon.com' && password === 'div1234') {
+                setIsLoading(true);
+                setTimeout(() => {
+                    setIsLoading(false);
+                    if (navigation) {
+                        navigation.replace('MainTabs');
+                    }
+                }, 2000);
+            } else {
+                setPasswordError('*Invalid email or password');
+            }
         }
     };
 
@@ -121,14 +133,18 @@ const Login = () => {
                                 </TouchableOpacity>
                             </View>
 
-                            <TouchableOpacity style={styles.loginButtonWrapper} onPress={handleLogin}>
+                            <TouchableOpacity style={styles.loginButtonWrapper} onPress={handleLogin} disabled={isLoading}>
                                 <LinearGradient
                                     colors={['#E55CC1', '#3D058B']}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 1 }}
                                     style={styles.loginButtonGradient}
                                 >
-                                    <View style={styles.arrowIcon} />
+                                    {isLoading ? (
+                                        <ActivityIndicator size="small" color="#FFFFFF" />
+                                    ) : (
+                                        <View style={styles.arrowIcon} />
+                                    )}
                                 </LinearGradient>
                             </TouchableOpacity>
                         </View>
